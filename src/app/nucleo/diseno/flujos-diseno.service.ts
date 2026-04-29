@@ -339,6 +339,14 @@ export class FlujosDisenoService {
     });
   }
 
+  transcribirPromptPdf(file: File): Observable<TranscripcionPromptAudioResponse> {
+    const formData = new FormData();
+    formData.append('file', file, file.name || 'proceso.pdf');
+    return this.http.post<TranscripcionPromptAudioResponse>(`${this.apiBaseUrl}/api/v1/diseno-tramites/flujos/prompt/transcribir-pdf`, formData, {
+      headers: this.authHeaders(false),
+    });
+  }
+
   construirDesdeFormulario(payload: ConstruirFlujoFormularioGuiadoRequest): Observable<ResultadoConstruccionFlujoResponse> {
     return this.http.post<ResultadoConstruccionFlujoResponse>(`${this.apiBaseUrl}/api/v1/diseno-tramites/flujos/construir-desde-formulario`, payload, {
       headers: this.authHeaders(),

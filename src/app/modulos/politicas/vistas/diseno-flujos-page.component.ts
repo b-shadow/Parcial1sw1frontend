@@ -495,6 +495,20 @@ type CampoEntregableDecision = {
                 Detener y transcribir
               </button>
             </div>
+            <div class="flex flex-wrap gap-2">
+              <input #pdfPromptInput type="file" accept="application/pdf" class="hidden" (change)="onPdfPromptSelected($event)" />
+              <button type="button" (click)="pdfPromptInput.click()" [disabled]="procesandoPdfPrompt() || loadingConstructores()" class="btn-secondary">
+                Subir PDF
+              </button>
+              <button type="button" (click)="procesarPdfPrompt()" [disabled]="!archivoPdfPrompt() || procesandoPdfPrompt() || loadingConstructores() || transcribiendoPrompt() || dictandoPrompt()" class="btn-secondary">
+                {{ procesandoPdfPrompt() ? 'Procesando PDF...' : 'Procesar PDF y abrir editor' }}
+              </button>
+            </div>
+            @if (archivoPdfPrompt()) {
+              <p class="m-0 rounded-lg border border-violet-300/60 bg-violet-100/60 px-3 py-2 text-xs font-semibold text-violet-800 dark:border-violet-400/30 dark:bg-violet-900/30 dark:text-violet-100">
+                PDF seleccionado: {{ archivoPdfPrompt()!.name }}
+              </p>
+            }
             @if (transcribiendoPrompt()) {
               <p class="m-0 rounded-lg border border-violet-300/60 bg-violet-100/60 px-3 py-2 text-xs font-semibold text-violet-800 dark:border-violet-400/30 dark:bg-violet-900/30 dark:text-violet-100">
                 Transcribiendo audio con IA...
@@ -1254,6 +1268,8 @@ export class DisenoFlujosPageComponent implements OnInit {
   readonly bpmnModelerXml = signal('');
   readonly dictandoPrompt = signal(false);
   readonly transcribiendoPrompt = signal(false);
+  readonly procesandoPdfPrompt = signal(false);
+  readonly archivoPdfPrompt = signal<File | null>(null);
   readonly mensajeGuardadoGrafico = signal('');
   readonly errorGuardadoGrafico = signal('');
   readonly graphLaneDepartmentIds = signal<string[]>([]);
@@ -2006,6 +2022,52 @@ export class DisenoFlujosPageComponent implements OnInit {
           this.loadingConstructores.set(false);
         },
       });
+  }
+
+  onPdfPromptSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files.length > 0 ? input.files[0] : null;
+    this.archivoPdfPrompt.set(file);
+    if (!file) {
+      this.globalError.set('No se selecciono ningun PDF.');
+      return;
+    }
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      this.archivoPdfPrompt.set(null);
+      this.globalError.set('Selecciona un archivo PDF valido.');
+      return;
+    }
+    this.globalError.set('');
+    this.globalMessage.set(`PDF cargado: ${file.name}`);
+  }
+
+  procesarPdfPrompt(): void {
+    this.globalError.set('');
+    this.globalMessage.set('');
+    const archivo = this.archivoPdfPrompt();
+    if (!archivo) {
+      this.globalError.set('Primero sube un PDF.');
+      return;
+    }
+    this.procesandoPdfPrompt.set(true);
+    this.flujosDisenoService.transcribirPromptPdf(archivo).subscribe({
+      next: (resultadoPdf) => {
+        const texto = (resultadoPdf.text ?? '').trim();
+        if (texto.length < 20) {
+          this.procesandoPdfPrompt.set(false);
+          this.globalError.set('El PDF no tiene suficiente texto para generar un flujo.');
+          return;
+        }
+        this.promptForm.patchValue({ prompt: texto });
+        this.procesandoPdfPrompt.set(false);
+        this.globalMessage.set('PDF procesado. Generando flujo y abriendo editor...');
+        this.generarDesdePrompt();
+      },
+      error: (error: unknown) => {
+        this.procesandoPdfPrompt.set(false);
+        this.globalError.set(this.extraerMensajeError(error, 'No se pudo procesar el PDF.'));
+      },
+    });
   }
 
   iniciarDictadoPrompt(): void {
@@ -3600,6 +3662,7 @@ export class DisenoFlujosPageComponent implements OnInit {
     this.cargarDepartamentos();
     this.cargarFlujos();
     this.seleccionarFlujo(response.flujoId);
+    this.activeTab.set('grafico');
   }
 
   private cargarBpmnFlujoInterno(flujoId: string, nombreFlujo: string): void {
