@@ -1,0 +1,76 @@
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light dark;
+  --app-bg: radial-gradient(circle at 8% 10%, #7c3aed2b 0%, transparent 28%),
+    radial-gradient(circle at 82% 82%, #d946ef2e 0%, transparent 36%),
+    linear-gradient(145deg, #f2e9ff 0%, #f7f2ff 34%, #eef2ff 100%);
+  --app-text: #2e1065;
+  --card-bg: rgba(255, 255, 255, 0.88);
+}
+
+html,
+body {
+  min-height: 100vh;
+}
+
+body {
+  margin: 0;
+  font-family: "Sora", "Trebuchet MS", sans-serif;
+  background: var(--app-bg);
+  color: var(--app-text);
+}
+
+/* BPMN canvas tuned to look closer to UML activity diagrams */
+.djs-container .bjs-powered-by {
+  display: none !important;
+}
+
+.djs-container .djs-palette {
+  background: #f7f7f7 !important;
+  border: 1px solid #d0d0d0 !important;
+}
+
+.djs-container .djs-palette .entry {
+  color: #1f1f1f !important;
+}
+
+/* Keep palette focused: hand, connect, start, task, decision, end */
+.djs-container .djs-palette .entry {
+  display: none !important;
+}
+.djs-container .djs-palette .entry.bpmn-icon-hand-tool,
+.djs-container .djs-palette .entry.bpmn-icon-connection-multi,
+.djs-container .djs-palette .entry.bpmn-icon-start-event-none,
+.djs-container .djs-palette .entry.bpmn-icon-task,
+.djs-container .djs-palette .entry.bpmn-icon-gateway-xor,
+.djs-container .djs-palette .entry.bpmn-icon-end-event-none {
+  display: block !important;
+}
+
+/* Grayscale rendering for UML-like visual language */
+.djs-container svg .djs-visual > :first-child {
+  stroke: #111 !important;
+  stroke-width: 2px !important;
+  fill: #fff !important;
+}
+
+.djs-container svg .djs-connection path {
+  stroke: #111 !important;
+  stroke-width: 2px !important;
+}
+
+.djs-container svg .djs-outline {
+  stroke: #111 !important;
+}
+
+.dark {
+  --app-bg: radial-gradient(circle at 10% 5%, #7c3aed40 0%, transparent 30%),
+    radial-gradient(circle at 92% 85%, #a21caf47 0%, transparent 38%),
+    linear-gradient(160deg, #0f0820 0%, #140a2f 45%, #1f0c3f 100%);
+  --app-text: #f3e8ff;
+  --card-bg: rgba(32, 12, 67, 0.62);
+}
