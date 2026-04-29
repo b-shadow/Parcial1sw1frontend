@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 
 import { ThemeToggleButtonComponent } from '../../../compartido/componentes/theme-toggle-button.component';
 import { AuthService, type LoginResponse } from '../../../nucleo/autenticacion/auth.service';
+import { PushWebService } from '../../../nucleo/notificaciones/push-web.service';
 import { ThemeService } from '../../../nucleo/ui/theme.service';
 
 @Component({
@@ -144,6 +145,7 @@ export class LoginPageComponent implements OnInit {
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly authService: AuthService,
+    private readonly pushWebService: PushWebService,
     private readonly router: Router,
     private readonly themeService: ThemeService,
   ) {}
@@ -171,6 +173,7 @@ export class LoginPageComponent implements OnInit {
         }
 
         this.authService.saveSession(response);
+        this.pushWebService.initializeForAuthenticatedUser(true).catch(() => undefined);
         this.router.navigateByUrl('/dashboard').finally(() => {
           this.isLoading.set(false);
         });

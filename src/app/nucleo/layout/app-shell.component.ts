@@ -5,6 +5,7 @@ import { finalize } from 'rxjs';
 
 import { ThemeToggleButtonComponent } from '../../compartido/componentes/theme-toggle-button.component';
 import { AuthService, type UsuarioSesion } from '../autenticacion/auth.service';
+import { PushWebService } from '../notificaciones/push-web.service';
 import { ThemeService } from '../ui/theme.service';
 
 type RolDashboard = 'ADMINISTRATIVO' | 'EJECUTIVO';
@@ -226,6 +227,7 @@ export class AppShellComponent implements OnInit {
 
   constructor(
     private readonly authService: AuthService,
+    private readonly pushWebService: PushWebService,
     private readonly themeService: ThemeService,
     private readonly router: Router,
   ) {}
@@ -239,6 +241,7 @@ export class AppShellComponent implements OnInit {
       return;
     }
     this.currentUser.set(user);
+    this.pushWebService.initializeForAuthenticatedUser().catch(() => undefined);
   }
 
   cerrarSesion(): void {
