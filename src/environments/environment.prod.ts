@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.tu-dominio.com',
-  wsUrl: 'wss://api.tu-dominio.com/ws',
+  apiUrl: 'https://plataforma-backend-ked3.onrender.com',
+  wsUrl: 'wss://plataforma-backend-ked3.onrender.com/ws',
   firebase: {
     apiKey: 'AIzaSyDniB2F0Uq0nQBZ7LPI_1ptNa29TEQhViu',
     authDomain: 'diagramas-bd72d.firebaseapp.com',
